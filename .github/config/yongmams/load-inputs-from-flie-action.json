@@ -1,3 +1,4 @@
 {
-  "message": "this from file"
+  "message": "this from file",
+  "common_2": "this from sub file"
 }
