@@ -1,0 +1,9 @@
+name: "Load Inputs Form File Action"
+description: "load inputs form file action."
+inputs:
+  file-path:
+    description: "Path of the Input file."
+    required: true
+runs:
+  using: "node12"
+  main: "lib/action.js"
