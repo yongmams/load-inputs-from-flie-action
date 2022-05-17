@@ -1,25 +1,49 @@
-import { readFileSync, existsSync } from 'fs'
+import * as fs from 'fs'
 import * as  core from '@actions/core';
+import * as  glob from '@actions/glob';
 
-try {
-    const filePath = core.getInput('file-path')?.trim();
+async function run(): Promise<void> {
+    try {
+        const searchPath = core.getInput('file-path', { required: true }).trim();
 
-    let payload: { [key: string]: any };
+        const globber = await glob.create(
+            searchPath,
+            getDefaultGlobOptions()
+        )
+        const rawSearchResults: string[] = await globber.glob();
 
-    if (filePath) {
-        if (existsSync(filePath)) {
-            payload = JSON.parse(
-                readFileSync(filePath, { encoding: 'utf8' })
-            )
+        for (const searchResult of rawSearchResults) {
+            const fileStats = await fs.promises.stat(searchResult)
 
-            Object.keys(payload).forEach(key => {
-                process.env[`INPUT_${key.replace(/ /g, '_').toUpperCase()}`] = payload[key] || '';
-            });
-        } else {
-            const path = filePath
-            process.stdout.write(`${path} does not exist.`)
+            if (fileStats.isFile()) {
+                loadInputsFormFile(searchResult);
+            }
         }
+    } catch (error: any) {
+        core.setFailed(error.message as string);
     }
-} catch (error: any) {
-    core.setFailed(error.message as string);
 }
+
+
+function loadInputsFormFile(searchResult: string) {
+
+    core.info(`loading inputs form ${searchResult}`);
+
+    const payload = JSON.parse(
+        fs.readFileSync(searchResult, { encoding: 'utf8' })
+    )
+
+    Object.keys(payload).forEach(key => {
+        process.env[`INPUT_${key.replace(/ /g, '_').toUpperCase()}`] = payload[key] || '';
+    });
+}
+
+function getDefaultGlobOptions(): glob.GlobOptions {
+    return {
+        followSymbolicLinks: true,
+        implicitDescendants: true,
+        omitBrokenSymbolicLinks: true
+    }
+}
+
+run();
