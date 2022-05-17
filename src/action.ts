@@ -5,6 +5,7 @@ import * as  glob from '@actions/glob';
 async function run(): Promise<void> {
     try {
         const searchPath = core.getInput('file-path', { required: true }).trim();
+        core.info(`search inputs file form ${searchPath}`);
 
         const globber = await glob.create(
             searchPath,
@@ -14,8 +15,10 @@ async function run(): Promise<void> {
 
         for (const searchResult of rawSearchResults) {
             const fileStats = await fs.promises.stat(searchResult)
+            
+            core.info(`loading inputs form ${searchResult}`);
 
-            if (fileStats.isFile()) {
+            if (!fileStats.isDirectory()) {
                 loadInputsFormFile(searchResult);
             }
         }
@@ -26,8 +29,6 @@ async function run(): Promise<void> {
 
 
 function loadInputsFormFile(searchResult: string) {
-
-    core.info(`loading inputs form ${searchResult}`);
 
     const payload = JSON.parse(
         fs.readFileSync(searchResult, { encoding: 'utf8' })
