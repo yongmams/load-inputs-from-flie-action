@@ -14,7 +14,7 @@ async function run(): Promise<void> {
 
         for (const searchResult of rawSearchResults) {
             const fileStats = await fs.promises.stat(searchResult)
-            
+
             core.info(`loading inputs form ${searchResult}`);
 
             if (!fileStats.isDirectory()) {
@@ -34,7 +34,7 @@ function loadInputsFormFile(searchResult: string) {
     )
 
     Object.keys(payload).forEach(key => {
-        process.env[`INPUT_${key.replace(/ /g, '_').toUpperCase()}`] = payload[key] || '';
+        core.exportVariable(key, payload[key]);
     });
 }
 
