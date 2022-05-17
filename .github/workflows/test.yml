@@ -22,10 +22,6 @@ jobs:
       - uses: yongmams/load-inputs-from-flie-action@dev
         with:
           file-path: .github/config/${{ github.repository }}.json
-          
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo ${ message }!
         
       # Runs a single command using the runners shell
       - name: Run a one-line script
